@@ -48,6 +48,8 @@ MonoBehaviour:
   NetworkCameraNetworkObject:
   - {fileID: 139536, guid: 661f29f0c0c86fa47b6015bd602d0ac6, type: 2}
   TestNetworkObject: []
+  PlayerPlatformNetworkObject:
+  - {fileID: 1050459119487774, guid: 3ace8cd8018cb9147a124dea9713009f, type: 2}
   automaticScenes: 1
 --- !u!1001 &100100000
 Prefab:

@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedInterpol("{\"inter\":[0.15,0,0]")]
-	public partial class PlayerPlatformNetworkObject : NetworkObject
+	[GeneratedInterpol("{\"inter\":[0.15,0]")]
+	public partial class BallNetworkObject : NetworkObject
 	{
-		public const int IDENTITY = 9;
+		public const int IDENTITY = 1;
 
 		private byte[] _dirtyFields = new byte[1];
 
@@ -47,66 +47,35 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			if (fieldAltered != null) fieldAltered("position", _position, timestep);
 		}
 		[ForgeGeneratedField]
-		private bool _alive;
-		public event FieldEvent<bool> aliveChanged;
-		public Interpolated<bool> aliveInterpolation = new Interpolated<bool>() { LerpT = 0f, Enabled = false };
-		public bool alive
+		private Vector2 _force;
+		public event FieldEvent<Vector2> forceChanged;
+		public InterpolateVector2 forceInterpolation = new InterpolateVector2() { LerpT = 0f, Enabled = false };
+		public Vector2 force
 		{
-			get { return _alive; }
+			get { return _force; }
 			set
 			{
 				// Don't do anything if the value is the same
-				if (_alive == value)
+				if (_force == value)
 					return;
 
 				// Mark the field as dirty for the network to transmit
 				_dirtyFields[0] |= 0x2;
-				_alive = value;
+				_force = value;
 				hasDirtyFields = true;
 			}
 		}
 
-		public void SetaliveDirty()
+		public void SetforceDirty()
 		{
 			_dirtyFields[0] |= 0x2;
 			hasDirtyFields = true;
 		}
 
-		private void RunChange_alive(ulong timestep)
+		private void RunChange_force(ulong timestep)
 		{
-			if (aliveChanged != null) aliveChanged(_alive, timestep);
-			if (fieldAltered != null) fieldAltered("alive", _alive, timestep);
-		}
-		[ForgeGeneratedField]
-		private uint _player;
-		public event FieldEvent<uint> playerChanged;
-		public Interpolated<uint> playerInterpolation = new Interpolated<uint>() { LerpT = 0f, Enabled = false };
-		public uint player
-		{
-			get { return _player; }
-			set
-			{
-				// Don't do anything if the value is the same
-				if (_player == value)
-					return;
-
-				// Mark the field as dirty for the network to transmit
-				_dirtyFields[0] |= 0x4;
-				_player = value;
-				hasDirtyFields = true;
-			}
-		}
-
-		public void SetplayerDirty()
-		{
-			_dirtyFields[0] |= 0x4;
-			hasDirtyFields = true;
-		}
-
-		private void RunChange_player(ulong timestep)
-		{
-			if (playerChanged != null) playerChanged(_player, timestep);
-			if (fieldAltered != null) fieldAltered("player", _player, timestep);
+			if (forceChanged != null) forceChanged(_force, timestep);
+			if (fieldAltered != null) fieldAltered("force", _force, timestep);
 		}
 
 		protected override void OwnershipChanged()
@@ -118,8 +87,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		public void SnapInterpolations()
 		{
 			positionInterpolation.current = positionInterpolation.target;
-			aliveInterpolation.current = aliveInterpolation.target;
-			playerInterpolation.current = playerInterpolation.target;
+			forceInterpolation.current = forceInterpolation.target;
 		}
 
 		public override int UniqueIdentity { get { return IDENTITY; } }
@@ -127,8 +95,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		protected override BMSByte WritePayload(BMSByte data)
 		{
 			UnityObjectMapper.Instance.MapBytes(data, _position);
-			UnityObjectMapper.Instance.MapBytes(data, _alive);
-			UnityObjectMapper.Instance.MapBytes(data, _player);
+			UnityObjectMapper.Instance.MapBytes(data, _force);
 
 			return data;
 		}
@@ -139,14 +106,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			positionInterpolation.current = _position;
 			positionInterpolation.target = _position;
 			RunChange_position(timestep);
-			_alive = UnityObjectMapper.Instance.Map<bool>(payload);
-			aliveInterpolation.current = _alive;
-			aliveInterpolation.target = _alive;
-			RunChange_alive(timestep);
-			_player = UnityObjectMapper.Instance.Map<uint>(payload);
-			playerInterpolation.current = _player;
-			playerInterpolation.target = _player;
-			RunChange_player(timestep);
+			_force = UnityObjectMapper.Instance.Map<Vector2>(payload);
+			forceInterpolation.current = _force;
+			forceInterpolation.target = _force;
+			RunChange_force(timestep);
 		}
 
 		protected override BMSByte SerializeDirtyFields()
@@ -157,9 +120,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			if ((0x1 & _dirtyFields[0]) != 0)
 				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _position);
 			if ((0x2 & _dirtyFields[0]) != 0)
-				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _alive);
-			if ((0x4 & _dirtyFields[0]) != 0)
-				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _player);
+				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _force);
 
 			// Reset all the dirty fields
 			for (int i = 0; i < _dirtyFields.Length; i++)
@@ -191,28 +152,15 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			}
 			if ((0x2 & readDirtyFlags[0]) != 0)
 			{
-				if (aliveInterpolation.Enabled)
+				if (forceInterpolation.Enabled)
 				{
-					aliveInterpolation.target = UnityObjectMapper.Instance.Map<bool>(data);
-					aliveInterpolation.Timestep = timestep;
+					forceInterpolation.target = UnityObjectMapper.Instance.Map<Vector2>(data);
+					forceInterpolation.Timestep = timestep;
 				}
 				else
 				{
-					_alive = UnityObjectMapper.Instance.Map<bool>(data);
-					RunChange_alive(timestep);
-				}
-			}
-			if ((0x4 & readDirtyFlags[0]) != 0)
-			{
-				if (playerInterpolation.Enabled)
-				{
-					playerInterpolation.target = UnityObjectMapper.Instance.Map<uint>(data);
-					playerInterpolation.Timestep = timestep;
-				}
-				else
-				{
-					_player = UnityObjectMapper.Instance.Map<uint>(data);
-					RunChange_player(timestep);
+					_force = UnityObjectMapper.Instance.Map<Vector2>(data);
+					RunChange_force(timestep);
 				}
 			}
 		}
@@ -227,15 +175,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 				_position = (Vector2)positionInterpolation.Interpolate();
 				//RunChange_position(positionInterpolation.Timestep);
 			}
-			if (aliveInterpolation.Enabled && !aliveInterpolation.current.UnityNear(aliveInterpolation.target, 0.0015f))
+			if (forceInterpolation.Enabled && !forceInterpolation.current.UnityNear(forceInterpolation.target, 0.0015f))
 			{
-				_alive = (bool)aliveInterpolation.Interpolate();
-				//RunChange_alive(aliveInterpolation.Timestep);
-			}
-			if (playerInterpolation.Enabled && !playerInterpolation.current.UnityNear(playerInterpolation.target, 0.0015f))
-			{
-				_player = (uint)playerInterpolation.Interpolate();
-				//RunChange_player(playerInterpolation.Timestep);
+				_force = (Vector2)forceInterpolation.Interpolate();
+				//RunChange_force(forceInterpolation.Timestep);
 			}
 		}
 
@@ -246,9 +189,9 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 		}
 
-		public PlayerPlatformNetworkObject() : base() { Initialize(); }
-		public PlayerPlatformNetworkObject(NetWorker networker, INetworkBehavior networkBehavior = null, int createCode = 0, byte[] metadata = null) : base(networker, networkBehavior, createCode, metadata) { Initialize(); }
-		public PlayerPlatformNetworkObject(NetWorker networker, uint serverId, FrameStream frame) : base(networker, serverId, frame) { Initialize(); }
+		public BallNetworkObject() : base() { Initialize(); }
+		public BallNetworkObject(NetWorker networker, INetworkBehavior networkBehavior = null, int createCode = 0, byte[] metadata = null) : base(networker, networkBehavior, createCode, metadata) { Initialize(); }
+		public BallNetworkObject(NetWorker networker, uint serverId, FrameStream frame) : base(networker, serverId, frame) { Initialize(); }
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}

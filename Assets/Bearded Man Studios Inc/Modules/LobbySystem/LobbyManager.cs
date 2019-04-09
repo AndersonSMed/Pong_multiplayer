@@ -447,10 +447,12 @@ namespace BeardedManStudios.Forge.Networking.Unity.Lobby
 			Myself.Setup(_myself, true);
 
 			List<IClientMockPlayer> currentPlayers = LobbyService.Instance.MasterLobby.LobbyPlayers;
+
 			for (int i = 0; i < currentPlayers.Count; ++i)
 			{
 				IClientMockPlayer currentPlayer = currentPlayers[i];
-				if (currentPlayer == _myself)
+                Debug.Log(currentPlayers[i].NetworkId);
+                if (currentPlayer == _myself)
 					continue;
 				OnFNPlayerConnected(currentPlayers[i]);
 			}

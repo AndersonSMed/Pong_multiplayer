@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"Vector3\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"newPosition\"]]")]
+	[GeneratedRPC("{\"types\":[[\"Vector3\", \"Vector3\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"newPosition\", \"direction\"]]")]
 	public abstract partial class PlayerPlatformBehavior : NetworkBehavior
 	{
 		public const byte RPC_MOVE = 0 + 5;
@@ -22,7 +22,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.AttachedBehavior = this;
 
 			base.SetupHelperRpcs(networkObject);
-			networkObject.RegisterRpc("move", move, typeof(Vector3));
+			networkObject.RegisterRpc("move", move, typeof(Vector3), typeof(Vector3));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -102,6 +102,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		/// <summary>
 		/// Arguments:
 		/// Vector3 newPosition
+		/// Vector3 direction
 		/// </summary>
 		public abstract void move(RpcArgs args);
 

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedInterpol("{\"inter\":[0.05,0]")]
+	[GeneratedInterpol("{\"inter\":[1.9,0]")]
 	public partial class BallNetworkObject : NetworkObject
 	{
 		public const int IDENTITY = 1;
@@ -18,7 +18,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		[ForgeGeneratedField]
 		private Vector2 _position;
 		public event FieldEvent<Vector2> positionChanged;
-		public InterpolateVector2 positionInterpolation = new InterpolateVector2() { LerpT = 0.05f, Enabled = true };
+		public InterpolateVector2 positionInterpolation = new InterpolateVector2() { LerpT = 1.9f, Enabled = true };
 		public Vector2 position
 		{
 			get { return _position; }

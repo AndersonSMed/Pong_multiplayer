@@ -7,10 +7,26 @@ using UnityEngine;
 
 public class GameManager : GameManagerBehavior {
 
+    private static GameManager instance;
+
     [SerializeField]
     private List<GameObject> platforms;
     // List containing all the players networkID
     private List<uint> playersList;
+
+    private void Awake() {
+        if (instance == null) {
+            instance = this;
+        } else if (instance != this) {
+            Destroy(instance);
+        }
+    }
+
+    public static GameManager Instance {
+        get {
+            return instance;
+        }
+    }
 
     public override void LogPlayer(RpcArgs args) {
         if (networkObject.IsServer) {
@@ -32,5 +48,15 @@ public class GameManager : GameManagerBehavior {
         }
         uint networkID = NetworkManager.Instance.Networker.Me.NetworkId;
         networkObject.SendRpc(RPC_LOG_PLAYER, Receivers.All, networkID);
+    }
+
+    private void Update() {
+        if (networkObject.IsServer) {
+            networkObject.GameStarted = NetworkManager.Instance.Networker.Players.Count >= 2;
+        }
+    }
+
+    public bool GameStarted () {
+        return networkObject.GameStarted;
     }
 }

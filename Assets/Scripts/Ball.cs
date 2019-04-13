@@ -16,7 +16,7 @@ public class Ball : BallBehavior {
     }
 
     void Update () {
-        if (NetworkManager.Instance.Networker.Players.Count >= 2) {
+        if (GameManager.Instance.GameStarted()) {
             if (!moving && networkObject.IsServer) {
                 int side = (int)Mathf.Floor(Random.Range(0, 4));
                 switch (side) {

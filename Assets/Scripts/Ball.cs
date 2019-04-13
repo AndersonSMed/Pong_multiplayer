@@ -16,7 +16,7 @@ public class Ball : BallBehavior {
     }
 
     void Update () {
-        if (NetworkManager.Instance.Networker.Players.Count >= 2) {
+        if (NetworkManager.Instance.Networker.Players.Count >= 1) {
             if (!moving && networkObject.IsServer) {
                 int side = (int)Mathf.Floor(Random.Range(0, 4));
                 switch (side) {
@@ -34,8 +34,7 @@ public class Ball : BallBehavior {
                         break;
                 }
                 moving = true;
-            }
-            else if (networkObject.IsServer) {
+            } else if (networkObject.IsServer) {
                 networkObject.position = transform.position;
             } else {
                 transform.position = networkObject.position;
@@ -43,9 +42,9 @@ public class Ball : BallBehavior {
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision) {
+    public void Collided (Vector3 direction) {
         if (networkObject.IsServer) {
-            rb.velocity *= 1.1f;
+            rb.velocity = (rb.velocity * 1.1f) + (Vector2) direction * 2;
         }
     }
 }

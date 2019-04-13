@@ -32,11 +32,13 @@ public class Player : PlayerPlatformBehavior {
 
     private void FixedUpdate() {
         if (NetworkManager.Instance.Networker.Me.NetworkId == player) {
-            transform.position += ((axis == "Horizontal") ? Vector3.right : Vector3.up) * Input.GetAxis(axis) * Time.deltaTime * acceleration;
+            Vector3 direction = ((axis == "Horizontal") ? Vector3.right : Vector3.up) * Input.GetAxis(axis) * Time.deltaTime * acceleration;
+            transform.position += direction;
             if (!networkObject.IsServer) {
-                networkObject.SendRpc(RPC_MOVE, Receivers.All, transform.position);
+                networkObject.SendRpc(RPC_MOVE, Receivers.All, transform.position, direction);
             } else {
                 networkObject.position = transform.position;
+                networkObject.direction = direction;
             }
         }
     }
@@ -51,6 +53,13 @@ public class Player : PlayerPlatformBehavior {
     public override void move(RpcArgs args) {
         if (networkObject.IsServer) {
             networkObject.position = args.GetNext<Vector3>();
+            networkObject.direction = args.GetNext<Vector3>();
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision) {
+        if (collision.gameObject.CompareTag("Ball") && networkObject.IsServer) {
+            collision.gameObject.GetComponent<Ball>().Collided(networkObject.direction);
         }
     }
 }

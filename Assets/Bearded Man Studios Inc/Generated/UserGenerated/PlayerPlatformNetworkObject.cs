@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedInterpol("{\"inter\":[0.15,0,0]")]
+	[GeneratedInterpol("{\"inter\":[0.15,0,0,0]")]
 	public partial class PlayerPlatformNetworkObject : NetworkObject
 	{
-		public const int IDENTITY = 7;
+		public const int IDENTITY = 9;
 
 		private byte[] _dirtyFields = new byte[1];
 
@@ -108,6 +108,37 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			if (playerChanged != null) playerChanged(_player, timestep);
 			if (fieldAltered != null) fieldAltered("player", _player, timestep);
 		}
+		[ForgeGeneratedField]
+		private Vector3 _direction;
+		public event FieldEvent<Vector3> directionChanged;
+		public InterpolateVector3 directionInterpolation = new InterpolateVector3() { LerpT = 0f, Enabled = false };
+		public Vector3 direction
+		{
+			get { return _direction; }
+			set
+			{
+				// Don't do anything if the value is the same
+				if (_direction == value)
+					return;
+
+				// Mark the field as dirty for the network to transmit
+				_dirtyFields[0] |= 0x8;
+				_direction = value;
+				hasDirtyFields = true;
+			}
+		}
+
+		public void SetdirectionDirty()
+		{
+			_dirtyFields[0] |= 0x8;
+			hasDirtyFields = true;
+		}
+
+		private void RunChange_direction(ulong timestep)
+		{
+			if (directionChanged != null) directionChanged(_direction, timestep);
+			if (fieldAltered != null) fieldAltered("direction", _direction, timestep);
+		}
 
 		protected override void OwnershipChanged()
 		{
@@ -120,6 +151,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			positionInterpolation.current = positionInterpolation.target;
 			aliveInterpolation.current = aliveInterpolation.target;
 			playerInterpolation.current = playerInterpolation.target;
+			directionInterpolation.current = directionInterpolation.target;
 		}
 
 		public override int UniqueIdentity { get { return IDENTITY; } }
@@ -129,6 +161,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			UnityObjectMapper.Instance.MapBytes(data, _position);
 			UnityObjectMapper.Instance.MapBytes(data, _alive);
 			UnityObjectMapper.Instance.MapBytes(data, _player);
+			UnityObjectMapper.Instance.MapBytes(data, _direction);
 
 			return data;
 		}
@@ -147,6 +180,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			playerInterpolation.current = _player;
 			playerInterpolation.target = _player;
 			RunChange_player(timestep);
+			_direction = UnityObjectMapper.Instance.Map<Vector3>(payload);
+			directionInterpolation.current = _direction;
+			directionInterpolation.target = _direction;
+			RunChange_direction(timestep);
 		}
 
 		protected override BMSByte SerializeDirtyFields()
@@ -160,6 +197,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _alive);
 			if ((0x4 & _dirtyFields[0]) != 0)
 				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _player);
+			if ((0x8 & _dirtyFields[0]) != 0)
+				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _direction);
 
 			// Reset all the dirty fields
 			for (int i = 0; i < _dirtyFields.Length; i++)
@@ -215,6 +254,19 @@ namespace BeardedManStudios.Forge.Networking.Generated
 					RunChange_player(timestep);
 				}
 			}
+			if ((0x8 & readDirtyFlags[0]) != 0)
+			{
+				if (directionInterpolation.Enabled)
+				{
+					directionInterpolation.target = UnityObjectMapper.Instance.Map<Vector3>(data);
+					directionInterpolation.Timestep = timestep;
+				}
+				else
+				{
+					_direction = UnityObjectMapper.Instance.Map<Vector3>(data);
+					RunChange_direction(timestep);
+				}
+			}
 		}
 
 		public override void InterpolateUpdate()
@@ -236,6 +288,11 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			{
 				_player = (uint)playerInterpolation.Interpolate();
 				//RunChange_player(playerInterpolation.Timestep);
+			}
+			if (directionInterpolation.Enabled && !directionInterpolation.current.UnityNear(directionInterpolation.target, 0.0015f))
+			{
+				_direction = (Vector3)directionInterpolation.Interpolate();
+				//RunChange_direction(directionInterpolation.Timestep);
 			}
 		}
 

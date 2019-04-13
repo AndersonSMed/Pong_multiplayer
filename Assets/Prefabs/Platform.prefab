@@ -100,7 +100,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 10
-  player: 0
+  player: 90
   axis: 
 --- !u!212 &212409358052686916
 SpriteRenderer:

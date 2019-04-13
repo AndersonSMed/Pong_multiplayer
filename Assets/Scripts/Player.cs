@@ -1,4 +1,6 @@
-﻿using BeardedManStudios.Forge.Networking.Generated;
+﻿using BeardedManStudios.Forge.Networking;
+using BeardedManStudios.Forge.Networking.Generated;
+using BeardedManStudios.Forge.Networking.Unity;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,43 +14,43 @@ public class Player : PlayerPlatformBehavior {
     [SerializeField]
     private string axis;
 
-    private Rigidbody2D rb;
-
     private void Start() {
-        rb = gameObject.GetComponent<Rigidbody2D>();
-        networkObject.alive = true;
-        networkObject.position = transform.position;
+        if (networkObject.IsServer) {
+            networkObject.position = transform.position;
+        }
     }
 
     void Update() {
 
         player = networkObject.player;
 
-        if (networkObject.MyPlayerId != player) {
+        if (NetworkManager.Instance.Networker.Me.NetworkId != player) {
             transform.position = networkObject.position;
-            gameObject.SetActive(networkObject.alive);
             return;
         }
-
-        networkObject.position = transform.position;
-
-        if (Input.GetAxis(axis) == 0f) {
-            rb.velocity = Vector2.zero;
-        }
-
     }
 
     private void FixedUpdate() {
-        if (networkObject.MyPlayerId == player) {
-            float newSpeed = Input.GetAxis(axis) * acceleration;
-            rb.AddForce((axis == "Horizontal") ? Vector2.right * newSpeed : Vector2.up * newSpeed);
+        if (NetworkManager.Instance.Networker.Me.NetworkId == player) {
+            transform.position += ((axis == "Horizontal") ? Vector3.right : Vector3.up) * Input.GetAxis(axis) * Time.deltaTime * acceleration;
+            if (!networkObject.IsServer) {
+                networkObject.SendRpc(RPC_MOVE, Receivers.All, transform.position);
+            } else {
+                networkObject.position = transform.position;
+            }
         }
     }
 
     public void SetId (uint ID) {
-        networkObject.alive = true;
-        networkObject.player = ID;
-        Debug.Log(networkObject.player);
-        Debug.Log(networkObject.player);
+        if (networkObject.IsServer) {
+            networkObject.alive = true;
+            networkObject.player = ID;
+        }
+    }
+
+    public override void move(RpcArgs args) {
+        if (networkObject.IsServer) {
+            networkObject.position = args.GetNext<Vector3>();
+        }
     }
 }

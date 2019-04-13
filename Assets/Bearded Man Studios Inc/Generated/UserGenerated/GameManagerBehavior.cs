@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BeardedManStudios.Forge.Networking.Generated
 {
 	[GeneratedRPC("{\"types\":[[\"uint\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"NetworkId\"]]")]
+	[GeneratedRPCVariableNames("{\"types\":[[\"playerID\"]]")]
 	public abstract partial class GameManagerBehavior : NetworkBehavior
 	{
 		public const byte RPC_LOG_PLAYER = 0 + 5;
@@ -101,7 +101,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 		/// <summary>
 		/// Arguments:
-		/// uint NetworkId
+		/// uint playerID
 		/// </summary>
 		public abstract void LogPlayer(RpcArgs args);
 

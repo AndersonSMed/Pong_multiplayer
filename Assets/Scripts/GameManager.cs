@@ -9,22 +9,12 @@ public class GameManager : GameManagerBehavior {
 
     [SerializeField]
     private List<GameObject> platforms;
-
-    private static GameManager instance;
     // List containing all the players networkID
     private List<uint> playersList;
 
-    public static GameManager Instance {
-        get {
-            return instance;
-        }
-    }
-
     public override void LogPlayer(RpcArgs args) {
-        uint network = args.GetNext<uint>();
-        Debug.Log(network);
-        playersList.Add(network);
         if (networkObject.IsServer) {
+            playersList.Add(args.GetNext<uint>());
             SetPlatforms();
         }
     }
@@ -34,23 +24,13 @@ public class GameManager : GameManagerBehavior {
         platforms[i].GetComponent<Player>().SetId(playersList[i]);
     }
 
-    private void Awake() {
-        if (instance != this) {
-            Destroy(instance);
-        }
-        if (instance == null) {
-            instance = this;
-        }
-        DontDestroyOnLoad(gameObject);
-    }
-
     private void Start() {
         if (networkObject.IsServer) {
             playersList = new List<uint>();
-            playersList.Add(networkObject.MyPlayerId);
+            playersList.Add(NetworkManager.Instance.Networker.Me.NetworkId);
             SetPlatforms();
-        } else {
-            networkObject.SendRpc(RPC_LOG_PLAYER, Receivers.Server, networkObject.MyPlayerId);
         }
+        uint networkID = NetworkManager.Instance.Networker.Me.NetworkId;
+        networkObject.SendRpc(RPC_LOG_PLAYER, Receivers.All, networkID);
     }
 }

@@ -31,7 +31,7 @@ public class Player : PlayerPlatformBehavior {
     }
 
     private void FixedUpdate() {
-        if (NetworkManager.Instance.Networker.Me.NetworkId == player) {
+        if (NetworkManager.Instance.Networker.Me.NetworkId == player && GameManager.Instance.GameStarted()) {
             Vector3 direction = ((axis == "Horizontal") ? Vector3.right : Vector3.up) * Input.GetAxis(axis) * Time.deltaTime * acceleration;
             transform.position += direction;
             if (!networkObject.IsServer) {

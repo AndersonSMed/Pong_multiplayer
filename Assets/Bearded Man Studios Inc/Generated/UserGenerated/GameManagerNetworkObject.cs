@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedInterpol("{\"inter\":[0,0]")]
+	[GeneratedInterpol("{\"inter\":[0,0,0]")]
 	public partial class GameManagerNetworkObject : NetworkObject
 	{
-		public const int IDENTITY = 5;
+		public const int IDENTITY = 9;
 
 		private byte[] _dirtyFields = new byte[1];
 
@@ -77,6 +77,37 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			if (LoggedPlayersChanged != null) LoggedPlayersChanged(_LoggedPlayers, timestep);
 			if (fieldAltered != null) fieldAltered("LoggedPlayers", _LoggedPlayers, timestep);
 		}
+		[ForgeGeneratedField]
+		private bool _WaitingPlayers;
+		public event FieldEvent<bool> WaitingPlayersChanged;
+		public Interpolated<bool> WaitingPlayersInterpolation = new Interpolated<bool>() { LerpT = 0f, Enabled = false };
+		public bool WaitingPlayers
+		{
+			get { return _WaitingPlayers; }
+			set
+			{
+				// Don't do anything if the value is the same
+				if (_WaitingPlayers == value)
+					return;
+
+				// Mark the field as dirty for the network to transmit
+				_dirtyFields[0] |= 0x4;
+				_WaitingPlayers = value;
+				hasDirtyFields = true;
+			}
+		}
+
+		public void SetWaitingPlayersDirty()
+		{
+			_dirtyFields[0] |= 0x4;
+			hasDirtyFields = true;
+		}
+
+		private void RunChange_WaitingPlayers(ulong timestep)
+		{
+			if (WaitingPlayersChanged != null) WaitingPlayersChanged(_WaitingPlayers, timestep);
+			if (fieldAltered != null) fieldAltered("WaitingPlayers", _WaitingPlayers, timestep);
+		}
 
 		protected override void OwnershipChanged()
 		{
@@ -88,6 +119,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		{
 			GameStartedInterpolation.current = GameStartedInterpolation.target;
 			LoggedPlayersInterpolation.current = LoggedPlayersInterpolation.target;
+			WaitingPlayersInterpolation.current = WaitingPlayersInterpolation.target;
 		}
 
 		public override int UniqueIdentity { get { return IDENTITY; } }
@@ -96,6 +128,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 		{
 			UnityObjectMapper.Instance.MapBytes(data, _GameStarted);
 			UnityObjectMapper.Instance.MapBytes(data, _LoggedPlayers);
+			UnityObjectMapper.Instance.MapBytes(data, _WaitingPlayers);
 
 			return data;
 		}
@@ -110,6 +143,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			LoggedPlayersInterpolation.current = _LoggedPlayers;
 			LoggedPlayersInterpolation.target = _LoggedPlayers;
 			RunChange_LoggedPlayers(timestep);
+			_WaitingPlayers = UnityObjectMapper.Instance.Map<bool>(payload);
+			WaitingPlayersInterpolation.current = _WaitingPlayers;
+			WaitingPlayersInterpolation.target = _WaitingPlayers;
+			RunChange_WaitingPlayers(timestep);
 		}
 
 		protected override BMSByte SerializeDirtyFields()
@@ -121,6 +158,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _GameStarted);
 			if ((0x2 & _dirtyFields[0]) != 0)
 				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _LoggedPlayers);
+			if ((0x4 & _dirtyFields[0]) != 0)
+				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _WaitingPlayers);
 
 			// Reset all the dirty fields
 			for (int i = 0; i < _dirtyFields.Length; i++)
@@ -163,6 +202,19 @@ namespace BeardedManStudios.Forge.Networking.Generated
 					RunChange_LoggedPlayers(timestep);
 				}
 			}
+			if ((0x4 & readDirtyFlags[0]) != 0)
+			{
+				if (WaitingPlayersInterpolation.Enabled)
+				{
+					WaitingPlayersInterpolation.target = UnityObjectMapper.Instance.Map<bool>(data);
+					WaitingPlayersInterpolation.Timestep = timestep;
+				}
+				else
+				{
+					_WaitingPlayers = UnityObjectMapper.Instance.Map<bool>(data);
+					RunChange_WaitingPlayers(timestep);
+				}
+			}
 		}
 
 		public override void InterpolateUpdate()
@@ -179,6 +231,11 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			{
 				_LoggedPlayers = (int)LoggedPlayersInterpolation.Interpolate();
 				//RunChange_LoggedPlayers(LoggedPlayersInterpolation.Timestep);
+			}
+			if (WaitingPlayersInterpolation.Enabled && !WaitingPlayersInterpolation.current.UnityNear(WaitingPlayersInterpolation.target, 0.0015f))
+			{
+				_WaitingPlayers = (bool)WaitingPlayersInterpolation.Interpolate();
+				//RunChange_WaitingPlayers(WaitingPlayersInterpolation.Timestep);
 			}
 		}
 

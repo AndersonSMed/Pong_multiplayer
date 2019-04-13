@@ -52,11 +52,20 @@ public class GameManager : GameManagerBehavior {
 
     private void Update() {
         if (networkObject.IsServer) {
-            networkObject.GameStarted = NetworkManager.Instance.Networker.Players.Count >= 2;
+            networkObject.WaitingPlayers = NetworkManager.Instance.Networker.Players.Count < 2;
+            if (!networkObject.WaitingPlayers && !networkObject.GameStarted) {
+                if (Input.GetAxis("Jump") > 0) {
+                    networkObject.GameStarted = true;
+                }
+            }
         }
     }
 
     public bool GameStarted () {
         return networkObject.GameStarted;
+    }
+
+    public bool WaitingPlayers () {
+        return networkObject.WaitingPlayers;
     }
 }

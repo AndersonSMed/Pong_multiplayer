@@ -64,6 +64,8 @@ public class GameManager : GameManagerBehavior {
                 for (int i = 0; i < playersList.Count; i++) {
                     if (!platforms[i].GetComponent<Player>().isAlive()) {
                         playersDead++;
+                    } else {
+                        networkObject.Winner = playersList[i];
                     }
                 }
                 if (playersDead == playersList.Count - 1) {
@@ -75,6 +77,10 @@ public class GameManager : GameManagerBehavior {
 
     public bool GameStarted () {
         return networkObject.GameStarted;
+    }
+
+    public uint Winner () {
+        return networkObject.Winner;
     }
 
     public bool GameEnded() {

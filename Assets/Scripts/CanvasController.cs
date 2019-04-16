@@ -15,10 +15,13 @@ public class CanvasController : MonoBehaviour {
     [SerializeField]
     private Text gameEndedText;
 
-    void Update () {
+    void Update() {
         waitingText.gameObject.SetActive(GameManager.Instance.WaitingPlayers());
         waitingInputText.gameObject.SetActive(!GameManager.Instance.WaitingPlayers() && !GameManager.Instance.GameStarted());
         gameEndedText.gameObject.SetActive(GameManager.Instance.GameEnded());
+        if (GameManager.Instance.GameEnded()) {
+            gameEndedText.text = "Game Over. Winner: Player " + GameManager.Instance.Winner();
+        }
         playerIdText.text = "Your Player ID: " + NetworkManager.Instance.Networker.Me.NetworkId;
     }
 }

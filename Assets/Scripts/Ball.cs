@@ -16,6 +16,9 @@ public class Ball : BallBehavior {
     }
 
     void Update () {
+        if (GameManager.Instance.GameEnded() && networkObject.IsServer) {
+            rb.velocity = Vector2.zero;
+        }
         if (GameManager.Instance.GameStarted()) {
             if (!moving && networkObject.IsServer) {
                 int side = (int)Mathf.Floor(Random.Range(0, 4));
@@ -41,9 +44,6 @@ public class Ball : BallBehavior {
             return;
         }
         transform.position = networkObject.position;
-        if (GameManager.Instance.GameEnded() && networkObject.IsServer) {
-            rb.velocity = Vector2.zero;
-        }
     }
 
     public void Collided (Vector3 direction) {

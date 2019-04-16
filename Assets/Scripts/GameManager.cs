@@ -45,6 +45,7 @@ public class GameManager : GameManagerBehavior {
             playersList = new List<uint>();
             playersList.Add(NetworkManager.Instance.Networker.Me.NetworkId);
             SetPlatforms();
+            networkObject.GameEnded = false;
         }
         uint networkID = NetworkManager.Instance.Networker.Me.NetworkId;
         networkObject.SendRpc(RPC_LOG_PLAYER, Receivers.All, networkID);
@@ -52,10 +53,21 @@ public class GameManager : GameManagerBehavior {
 
     private void Update() {
         if (networkObject.IsServer) {
-            networkObject.WaitingPlayers = NetworkManager.Instance.Networker.Players.Count < 2;
+            networkObject.WaitingPlayers = NetworkManager.Instance.Networker.Players.Count < 4;
             if (!networkObject.WaitingPlayers && !networkObject.GameStarted) {
                 if (Input.GetAxis("Jump") > 0) {
                     networkObject.GameStarted = true;
+                }
+            }
+            if (networkObject.GameStarted) {
+                int playersDead = 0;
+                for (int i = 0; i < playersList.Count; i++) {
+                    if (!platforms[i].GetComponent<Player>().isAlive()) {
+                        playersDead++;
+                    }
+                }
+                if (playersDead == playersList.Count - 1) {
+                    networkObject.GameEnded = true;
                 }
             }
         }
@@ -63,6 +75,10 @@ public class GameManager : GameManagerBehavior {
 
     public bool GameStarted () {
         return networkObject.GameStarted;
+    }
+
+    public bool GameEnded() {
+        return networkObject.GameEnded;
     }
 
     public bool WaitingPlayers () {

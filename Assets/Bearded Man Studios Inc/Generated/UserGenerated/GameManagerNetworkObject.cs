@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedInterpol("{\"inter\":[0,0,0]")]
+	[GeneratedInterpol("{\"inter\":[0,0,0,0,0]")]
 	public partial class GameManagerNetworkObject : NetworkObject
 	{
 		public const int IDENTITY = 9;
@@ -108,6 +108,68 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			if (WaitingPlayersChanged != null) WaitingPlayersChanged(_WaitingPlayers, timestep);
 			if (fieldAltered != null) fieldAltered("WaitingPlayers", _WaitingPlayers, timestep);
 		}
+		[ForgeGeneratedField]
+		private bool _GameEnded;
+		public event FieldEvent<bool> GameEndedChanged;
+		public Interpolated<bool> GameEndedInterpolation = new Interpolated<bool>() { LerpT = 0f, Enabled = false };
+		public bool GameEnded
+		{
+			get { return _GameEnded; }
+			set
+			{
+				// Don't do anything if the value is the same
+				if (_GameEnded == value)
+					return;
+
+				// Mark the field as dirty for the network to transmit
+				_dirtyFields[0] |= 0x8;
+				_GameEnded = value;
+				hasDirtyFields = true;
+			}
+		}
+
+		public void SetGameEndedDirty()
+		{
+			_dirtyFields[0] |= 0x8;
+			hasDirtyFields = true;
+		}
+
+		private void RunChange_GameEnded(ulong timestep)
+		{
+			if (GameEndedChanged != null) GameEndedChanged(_GameEnded, timestep);
+			if (fieldAltered != null) fieldAltered("GameEnded", _GameEnded, timestep);
+		}
+		[ForgeGeneratedField]
+		private uint _Winner;
+		public event FieldEvent<uint> WinnerChanged;
+		public Interpolated<uint> WinnerInterpolation = new Interpolated<uint>() { LerpT = 0f, Enabled = false };
+		public uint Winner
+		{
+			get { return _Winner; }
+			set
+			{
+				// Don't do anything if the value is the same
+				if (_Winner == value)
+					return;
+
+				// Mark the field as dirty for the network to transmit
+				_dirtyFields[0] |= 0x10;
+				_Winner = value;
+				hasDirtyFields = true;
+			}
+		}
+
+		public void SetWinnerDirty()
+		{
+			_dirtyFields[0] |= 0x10;
+			hasDirtyFields = true;
+		}
+
+		private void RunChange_Winner(ulong timestep)
+		{
+			if (WinnerChanged != null) WinnerChanged(_Winner, timestep);
+			if (fieldAltered != null) fieldAltered("Winner", _Winner, timestep);
+		}
 
 		protected override void OwnershipChanged()
 		{
@@ -120,6 +182,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			GameStartedInterpolation.current = GameStartedInterpolation.target;
 			LoggedPlayersInterpolation.current = LoggedPlayersInterpolation.target;
 			WaitingPlayersInterpolation.current = WaitingPlayersInterpolation.target;
+			GameEndedInterpolation.current = GameEndedInterpolation.target;
+			WinnerInterpolation.current = WinnerInterpolation.target;
 		}
 
 		public override int UniqueIdentity { get { return IDENTITY; } }
@@ -129,6 +193,8 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			UnityObjectMapper.Instance.MapBytes(data, _GameStarted);
 			UnityObjectMapper.Instance.MapBytes(data, _LoggedPlayers);
 			UnityObjectMapper.Instance.MapBytes(data, _WaitingPlayers);
+			UnityObjectMapper.Instance.MapBytes(data, _GameEnded);
+			UnityObjectMapper.Instance.MapBytes(data, _Winner);
 
 			return data;
 		}
@@ -147,6 +213,14 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			WaitingPlayersInterpolation.current = _WaitingPlayers;
 			WaitingPlayersInterpolation.target = _WaitingPlayers;
 			RunChange_WaitingPlayers(timestep);
+			_GameEnded = UnityObjectMapper.Instance.Map<bool>(payload);
+			GameEndedInterpolation.current = _GameEnded;
+			GameEndedInterpolation.target = _GameEnded;
+			RunChange_GameEnded(timestep);
+			_Winner = UnityObjectMapper.Instance.Map<uint>(payload);
+			WinnerInterpolation.current = _Winner;
+			WinnerInterpolation.target = _Winner;
+			RunChange_Winner(timestep);
 		}
 
 		protected override BMSByte SerializeDirtyFields()
@@ -160,6 +234,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _LoggedPlayers);
 			if ((0x4 & _dirtyFields[0]) != 0)
 				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _WaitingPlayers);
+			if ((0x8 & _dirtyFields[0]) != 0)
+				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _GameEnded);
+			if ((0x10 & _dirtyFields[0]) != 0)
+				UnityObjectMapper.Instance.MapBytes(dirtyFieldsData, _Winner);
 
 			// Reset all the dirty fields
 			for (int i = 0; i < _dirtyFields.Length; i++)
@@ -215,6 +293,32 @@ namespace BeardedManStudios.Forge.Networking.Generated
 					RunChange_WaitingPlayers(timestep);
 				}
 			}
+			if ((0x8 & readDirtyFlags[0]) != 0)
+			{
+				if (GameEndedInterpolation.Enabled)
+				{
+					GameEndedInterpolation.target = UnityObjectMapper.Instance.Map<bool>(data);
+					GameEndedInterpolation.Timestep = timestep;
+				}
+				else
+				{
+					_GameEnded = UnityObjectMapper.Instance.Map<bool>(data);
+					RunChange_GameEnded(timestep);
+				}
+			}
+			if ((0x10 & readDirtyFlags[0]) != 0)
+			{
+				if (WinnerInterpolation.Enabled)
+				{
+					WinnerInterpolation.target = UnityObjectMapper.Instance.Map<uint>(data);
+					WinnerInterpolation.Timestep = timestep;
+				}
+				else
+				{
+					_Winner = UnityObjectMapper.Instance.Map<uint>(data);
+					RunChange_Winner(timestep);
+				}
+			}
 		}
 
 		public override void InterpolateUpdate()
@@ -236,6 +340,16 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			{
 				_WaitingPlayers = (bool)WaitingPlayersInterpolation.Interpolate();
 				//RunChange_WaitingPlayers(WaitingPlayersInterpolation.Timestep);
+			}
+			if (GameEndedInterpolation.Enabled && !GameEndedInterpolation.current.UnityNear(GameEndedInterpolation.target, 0.0015f))
+			{
+				_GameEnded = (bool)GameEndedInterpolation.Interpolate();
+				//RunChange_GameEnded(GameEndedInterpolation.Timestep);
+			}
+			if (WinnerInterpolation.Enabled && !WinnerInterpolation.current.UnityNear(WinnerInterpolation.target, 0.0015f))
+			{
+				_Winner = (uint)WinnerInterpolation.Interpolate();
+				//RunChange_Winner(WinnerInterpolation.Timestep);
 			}
 		}
 

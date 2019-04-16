@@ -17,12 +17,15 @@ public class Player : PlayerPlatformBehavior {
     private void Start() {
         if (networkObject.IsServer) {
             networkObject.position = transform.position;
+            networkObject.alive = true;
         }
     }
 
     void Update() {
 
         player = networkObject.player;
+
+        gameObject.SetActive(networkObject.alive);
 
         if (NetworkManager.Instance.Networker.Me.NetworkId != player) {
             transform.position = networkObject.position;
@@ -31,7 +34,7 @@ public class Player : PlayerPlatformBehavior {
     }
 
     private void FixedUpdate() {
-        if (NetworkManager.Instance.Networker.Me.NetworkId == player && GameManager.Instance.GameStarted()) {
+        if (NetworkManager.Instance.Networker.Me.NetworkId == player && GameManager.Instance.GameStarted() && !GameManager.Instance.GameEnded()) {
             Vector3 direction = ((axis == "Horizontal") ? Vector3.right : Vector3.up) * Input.GetAxis(axis) * Time.deltaTime * acceleration;
             transform.position += direction;
             if (!networkObject.IsServer) {
@@ -60,6 +63,16 @@ public class Player : PlayerPlatformBehavior {
     private void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.CompareTag("Ball") && networkObject.IsServer) {
             collision.gameObject.GetComponent<Ball>().Collided(networkObject.direction);
+        }
+    }
+
+    public bool isAlive() {
+        return networkObject.alive;
+    }
+
+    public void KillPlayer () {
+        if (networkObject.IsServer) {
+            networkObject.alive = false;
         }
     }
 }

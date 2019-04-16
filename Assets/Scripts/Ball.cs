@@ -41,11 +41,20 @@ public class Ball : BallBehavior {
             return;
         }
         transform.position = networkObject.position;
+        if (GameManager.Instance.GameEnded() && networkObject.IsServer) {
+            rb.velocity = Vector2.zero;
+        }
     }
 
     public void Collided (Vector3 direction) {
         if (networkObject.IsServer) {
             rb.velocity = rb.velocity + (Vector2) direction * 2;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision) {
+        if (collision.gameObject.CompareTag("Wall") && networkObject.IsServer) {
+            collision.gameObject.GetComponent<Wall>().KillPlayer();
         }
     }
 }
